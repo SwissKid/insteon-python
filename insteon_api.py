@@ -13,9 +13,9 @@ def token_request(data_list):
 	opener = urllib2.build_opener()
 	request = {'client_id' : API_Key}
 	data_list.update(request)
-	print data_list
+	#print data_list
 	data_encoded = urllib.urlencode(data_list)	
-	print data_encoded
+	#print data_encoded
 	response = opener.open("https://connect.insteon.com/api/v2/oauth2/token", data_encoded)
 	content = response.read()
 	dict_return = json.loads(content)
@@ -100,33 +100,9 @@ def populate_houses():
 def populate_devices():
 	global devices
 	devices = general_get_request("devices?properties=all")
-	save_account	
+	save_account()
 
 
-##Test thing to see about the status of each device:
-def list_device_status():
-	if devices == {}:
-		populate_devices()
-	for item in devices["DeviceList"]:
-		#Check if it's a multi-device device (like keypads and outlets)
-		name = item["DeviceName"]
-		device_id = item["DeviceID"]
-		if item["GroupList"] == []:
-			print name
-			dev_status(device_id)
-			#print "balls"
-			
-		else:
-			#device is not that, the ones i know about are keypads and outlets
-			print name + " is not a device we are checking"
-			device_item = ""
-			category = hex(item["DevCat"])
-			subcategory = hex(item["SubCat"])
-			for device_item in dev_categories: 
-				if category in device_item['Device Sub-Category'] and subcategory in device_item['Device Sub-Category']:
-					device = device_item
-			if device_item['SKU'] == "2663-222": #On Off Outlet
-				print "on/off outlet"
 
 			
 def device_command(device_id, command_string, data_list={}):
@@ -173,6 +149,44 @@ def dev_status(device_id):
 		device_status = str(dict_return["level"]) + "% On"
 	print device_status
 
+##Test thing to see about the status of each device:
+def list_device_status():
+	if devices == {}:
+		populate_devices()
+	for item in devices["DeviceList"]:
+		#Check if it's a multi-device device (like keypads and outlets)
+		name = item["DeviceName"]
+		device_id = item["DeviceID"]
+		#if item["GroupList"] == []:
+		print name
+		dev_status(device_id)
+			#print "balls"
+			
+	#	else:
+	#		#device is not that, the ones i know about are keypads and outlets
+	#		print name + " is not a device we are checking"
+	#		device_item = ""
+	#		category = hex(item["DevCat"])
+	#		subcategory = hex(item["SubCat"])
+	#		for device_item in dev_categories: 
+	#			if category in device_item['Device Sub-Category'] and subcategory in device_item['Device Sub-Category']:
+	#				device = device_item
+	#		if device_item['SKU'] == "2663-222": #On Off Outlet
+	#			print "on/off outlet"
+
+def device_off(device_id):
+	device_command(device_id, "off")
+def device_on(device_id, level=0):
+	if level == 0:
+		for device in devices["DeviceList"]:
+			if device_id == device["DeviceID"]:
+				#print "Finding level"
+				prelevel = device["DimLevel"]
+				level  = (( prelevel + 1) * 100 )/ 255
+	if level < 10: #It doesn't work correctly under 10. Who knows why....
+		level = 10
+	device_command(device_id, "on", {"level": level })
+
 ##Dealing with the files
 def save_account():
 	with open(account_filename, 'w') as f:
@@ -181,7 +195,7 @@ def save_account():
 try:
 	with open(account_filename) as f:
 		account_authorization, account_houses, house_data, devices, rooms, scenes = pickle.load(f)
-		print account_authorization, account_houses;
+		#print account_authorization, account_houses;
 except:
 	save_account()
 
@@ -195,6 +209,9 @@ with open('device_categories.json') as data_file:
 #house_check()
 #populate_houses()
 #populate_devices()
-house_check()
-list_device_status()
+#house_check()
+#list_device_status()
 
+for device in devices["DeviceList"]:
+	if "Bedroom Lamp" in device["DeviceName"]:
+		device_on(device["DeviceID"], 5)
