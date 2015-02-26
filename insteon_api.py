@@ -187,6 +187,16 @@ def device_on(device_id, level=0):
 		level = 10
 	device_command(device_id, "on", {"level": level })
 
+#Room Endpoint
+def get_rooms():
+	global rooms
+	rooms = general_get_request("rooms?properties=all")
+	save_account()
+	
+def dev_search_id(device_id):
+	for device in devices["DeviceList"]:
+		if device_id == device["DeviceID"]:
+			return device
 ##Dealing with the files
 def save_account():
 	with open(account_filename, 'w') as f:
@@ -204,6 +214,7 @@ with open('device_categories.json') as data_file:
 	dev_categories = data['Device Category List']
 
 
+
 #refresh_bearer()
 #account_list()
 #house_check()
@@ -212,6 +223,12 @@ with open('device_categories.json') as data_file:
 #house_check()
 #list_device_status()
 
-for device in devices["DeviceList"]:
-	if "Bedroom Lamp" in device["DeviceName"]:
-		device_on(device["DeviceID"], 5)
+#for device in devices["DeviceList"]:
+#	if "Bedroom Lamp" in device["DeviceName"]:
+#		device_on(device["DeviceID"], 5)
+get_rooms()
+for item in rooms["RoomList"]:
+	print item["RoomName"]
+	for item2 in item["DeviceList"]:
+		device = dev_search_id(item2["DeviceID"])
+		print "\t" + device["DeviceName"]
