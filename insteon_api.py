@@ -147,7 +147,8 @@ def dev_status(device_id):
 		device_status = "Off"
 	else:
 		device_status = str(dict_return["level"]) + "% On"
-	print device_status
+	#print device_status
+	return dict_return["level"]
 
 ##Test thing to see about the status of each device:
 def list_device_status():
