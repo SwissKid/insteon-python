@@ -245,5 +245,5 @@ with open('device_categories.json') as data_file:
 #for device in devices["DeviceList"]:
 #	if "Bedroom Lamp" in device["DeviceName"]:
 #		device_on(device["DeviceID"], 5)
-get_scenes()
-scene_listing()
+#get_scenes()
+#scene_listing()
