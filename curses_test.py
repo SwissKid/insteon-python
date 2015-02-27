@@ -84,7 +84,7 @@ def threaded_off(device_id):
 	thread = threading.Thread(target=insteon.device_off, args=(device_id,))
 	thread.start()
 	mapping_list[hilight]["Status"] = "0"
-	logging.error(mapping_list)
+	#logging.error(mapping_list)
 	draw_list(lines)	
 	stdscr.refresh()
 	return thread
@@ -131,8 +131,8 @@ def main(stdscr):
 				hilight += 1
 		elif key == "O":
 			check_threads(threads)
-			logging.error("O hit")
-			logging.error("trying to turn on " )
+			#logging.error("O hit")
+			#logging.error("trying to turn on " )
 			if mapping_list[hilight]["Type"] == "Device":
 				threads.append(threaded_on(mapping_list[hilight]["DeviceID"]))
 			elif mapping_list[hilight]["Type"] == "Room":
@@ -141,8 +141,8 @@ def main(stdscr):
 					threaded_status(lines)
 		elif key == "o":
 			check_threads(threads)
-			logging.error("o hit")
-			logging.error("trying to turn off " )
+			#logging.error("o hit")
+			#logging.error("trying to turn off " )
 			if mapping_list[hilight]["Type"] == "Device":
 				threads.append(threaded_off(mapping_list[hilight]["DeviceID"]))
 			elif mapping_list[hilight]["Type"] == "Room":
