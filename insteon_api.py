@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import urllib, urllib2, json, pickle
+import urllib, urllib2, json, pickle, logging
 from secrets import API_Key, Client_Secret, Refresh_Token, account_name
 account_filename = "accounts/" + account_name + ".pickle"
 account_authorization = ""
@@ -47,9 +47,9 @@ def general_get_request(endpoint):
 			request = urllib2.Request(url = "https://connect.insteon.com/api/v2/" + endpoint,  headers = headers)
 			response = urllib2.urlopen(request)
 		except urllib2.HTTPError, e:
-			print e.code
+			logging.error(e.code)
 			if e.code == 403 or e.code == 401:
-				print e.read()
+				logging.error( e.read())
 				refresh_token()
 			elif e.code == 500:
 				break
@@ -122,8 +122,19 @@ def device_command(device_id, command_string, data_list={}):
 		  }
 	data_list.update(request)
 	data_encoded = urllib.urlencode(data_list)	
-	request = urllib2.Request("https://connect.insteon.com/api/v2/commands", data = json.dumps(data_list), headers = headers)
-	response = urllib2.urlopen(request)
+	loop = True
+	while True:
+		try:
+			request = urllib2.Request("https://connect.insteon.com/api/v2/commands", data = json.dumps(data_list), headers = headers)
+			response = urllib2.urlopen(request)
+		except urllib2.HTTPError, e:
+			logging.error( e.code)
+			logging.error( e.read())
+			if e.code == 403 or e.code == 401:
+				print e.read()
+				refresh_token()
+			continue
+		break
 	content = response.read()
 	dict_return = json.loads(content)
 	command_id = dict_return["id"]
