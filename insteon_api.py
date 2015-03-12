@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import os, urllib, urllib2, json, pickle, logging
 from secrets import API_Key, Client_Secret, Refresh_Token, account_name
-account_filename = os.getenviron["HOME"]+ "/.config/inseton-python/accounts/" + account_name + ".pickle"
+account_filename = os.environ["HOME"]+ "/.config/inseton-python/accounts/" + account_name + ".pickle"
 
 account_authorization = ""
 account_houses = {}
