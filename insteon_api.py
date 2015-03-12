@@ -142,13 +142,13 @@ def device_command(device_id, command_string, data_list={}):
 	while True:
 		command_return = general_get_request("commands/" + str(command_id))
 		status = command_return["status"]
-		if status == "succeeded ":
+		if "succeeded" in status:
 			break
 		#print "WHY IS IT WRONG: " + status + "!!!!!"
 
 
 	#print command_return
-	return command_return["response"]
+	return command_return["status"]
 
 def dev_status(device_id):
 	dict_return = device_command(device_id, "get_status")
@@ -278,13 +278,13 @@ def scene_command(scene_id, command_string, data_list={}):
 	while True:
 		command_return = general_get_request("commands/" + str(command_id))
 		status = command_return["status"]
-		if status == "succeeded ":
+		if "succeeded" in status:
 			break
 		#print "WHY IS IT WRONG: " + status + "!!!!!"
 
 
 	#print command_return
-	return command_return["response"]
+	return command_return["status"]
 def scene_off(scene_id):
 	scene_command(scene_id, "off")
 def scene_on(scene_id, level=0):
