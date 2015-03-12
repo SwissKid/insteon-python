@@ -1,7 +1,8 @@
 #!/usr/bin/env python2
-import urllib, urllib2, json, pickle, logging
+import os, urllib, urllib2, json, pickle, logging
 from secrets import API_Key, Client_Secret, Refresh_Token, account_name
-account_filename = "accounts/" + account_name + ".pickle"
+account_filename = os.getenviron["HOME"]+ ".config/inseton-python/accounts/" + account_name + ".pickle"
+
 account_authorization = ""
 account_houses = {}
 house_data = {}
@@ -28,7 +29,7 @@ def refresh_bearer():
 		'grant_type' : 'refresh_token'}
 	response = token_request(data_list)
 	account_authorization = response["access_token"]
-	#print account_authorization
+	logging.debug(account_authorization)
 	save_account()
 
 def general_get_request(endpoint):
@@ -36,21 +37,21 @@ def general_get_request(endpoint):
 		#opener = urllib2.build_opener()
 		if account_authorization == "":
 			refresh_bearer()
-		headers = { 
-			"Content-Type" : "application/json",
-			"Authentication" : "APIKey " + API_Key,
-			"Authorization" : "Bearer " + account_authorization
-			}
 		#for item in headers:
 			#opener.addheaders.append((item , headers[item]))
 		try:
+			headers = { 
+				"Content-Type" : "application/json",
+				"Authentication" : "APIKey " + API_Key,
+				"Authorization" : "Bearer " + account_authorization
+				}
 			request = urllib2.Request(url = "https://connect.insteon.com/api/v2/" + endpoint,  headers = headers)
 			response = urllib2.urlopen(request)
 		except urllib2.HTTPError, e:
 			logging.error(e.code)
 			if e.code == 403 or e.code == 401:
 				logging.error( e.read())
-				refresh_token()
+				refresh_bearer()
 			elif e.code == 500:
 				break
 		else:
@@ -132,7 +133,7 @@ def device_command(device_id, command_string, data_list={}):
 			logging.error( e.read())
 			if e.code == 403 or e.code == 401:
 				print e.read()
-				refresh_token()
+				refresh_bearer()
 			continue
 		break
 	content = response.read()
@@ -210,12 +211,25 @@ def get_rooms():
 	global rooms
 	rooms = general_get_request("rooms?properties=all")
 	save_account()
+
 def room_listing():
 	for item in rooms["RoomList"]:
 		print item["RoomName"]
 		for item2 in item["DeviceList"]:
 			device = dev_search_id(item2["DeviceID"])
 			print "\t" + device["DeviceName"]
+
+#def room_off(room_id):
+#	for item in rooms["RoomList"]:
+#		if item["RoomID"] == room_id:
+#			for device in item["DeviceList"]:
+#				device_off(device["DeviceID"])
+#
+#def room_on(room_id):
+#	for item in rooms["RoomList"]:
+#		if item["RoomID"] == room_id:
+#			for device in item["DeviceList"]:
+#				device_on(device["DeviceID"])
 	
 #Scenes Endpoint
 def get_scenes():
@@ -255,7 +269,7 @@ def scene_command(scene_id, command_string, data_list={}):
 			logging.error( e.read())
 			if e.code == 403 or e.code == 401:
 				print e.read()
-				refresh_token()
+				refresh_bearer()
 			continue
 		break
 	content = response.read()
