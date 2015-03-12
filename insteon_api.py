@@ -288,15 +288,7 @@ def scene_command(scene_id, command_string, data_list={}):
 def scene_off(scene_id):
 	scene_command(scene_id, "off")
 def scene_on(scene_id, level=0):
-	if level == 0:
-		for scene in scenes["SceneList"]:
-			if scene_id == scene["SceneID"]:
-				#print "Finding level"
-				prelevel = scene["DimLevel"]
-				level  = (( prelevel + 1) * 100 )/ 255
-	if level < 10: #It doesn't work correctly under 10. Who knows why....
-		level = 10
-	scene_command(scene_id, "on", {"level": level })
+	scene_command(scene_id, "on")
 
 
 ##Dealing with the files
