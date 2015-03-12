@@ -311,9 +311,14 @@ try:
 except:
 	save_account()
 
-with open('device_categories.json') as data_file:
-	data = json.load(data_file)
-	dev_categories = data['Device Category List']
+try: 
+	with open('device_categories.json') as data_file:
+		data = json.load(data_file)
+		dev_categories = data['Device Category List']
+except:
+	with open(os.environ["HOME"] + '/.config/insteon-python/device_categories.json') as data_file:
+		data = json.load(data_file)
+		dev_categories = data['Device Category List']
 
 
 
