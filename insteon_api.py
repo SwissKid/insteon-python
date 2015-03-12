@@ -228,6 +228,63 @@ def scene_listing():
 		for item2 in item["DeviceList"]:
 			device = dev_search_id(item2["DeviceID"])
 			print "\t" + device["DeviceName"]
+def scene_command(scene_id, command_string, data_list={}):
+	#opener = urllib2.build_opener()
+	if account_authorization == "":
+		refresh_bearer()
+	headers = { 
+		"Content-Type" : "application/json",
+		"Authentication" : "APIKey " + API_Key,
+		"Authorization" : "Bearer " + account_authorization
+		}
+	#for item in headers:
+	#	opener.addheaders.append((item , headers[item]))
+	request = {
+		'scene_id' : scene_id,
+		'command': command_string
+		  }
+	data_list.update(request)
+	data_encoded = urllib.urlencode(data_list)	
+	loop = True
+	while True:
+		try:
+			request = urllib2.Request("https://connect.insteon.com/api/v2/commands", data = json.dumps(data_list), headers = headers)
+			response = urllib2.urlopen(request)
+		except urllib2.HTTPError, e:
+			logging.error( e.code)
+			logging.error( e.read())
+			if e.code == 403 or e.code == 401:
+				print e.read()
+				refresh_token()
+			continue
+		break
+	content = response.read()
+	dict_return = json.loads(content)
+	command_id = dict_return["id"]
+	while True:
+		command_return = general_get_request("commands/" + str(command_id))
+		status = command_return["status"]
+		if status == "succeeded ":
+			break
+		#print "WHY IS IT WRONG: " + status + "!!!!!"
+
+
+	#print command_return
+	return command_return["response"]
+def scene_off(scene_id):
+	scene_command(scene_id, "off")
+def scene_on(scene_id, level=0):
+	if level == 0:
+		for scene in scenes["SceneList"]:
+			if scene_id == scene["SceneID"]:
+				#print "Finding level"
+				prelevel = scene["DimLevel"]
+				level  = (( prelevel + 1) * 100 )/ 255
+	if level < 10: #It doesn't work correctly under 10. Who knows why....
+		level = 10
+	scene_command(scene_id, "on", {"level": level })
+
+
 ##Dealing with the files
 def save_account():
 	with open(account_filename, 'w') as f:
