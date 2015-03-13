@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import os, urllib, urllib2, json, pickle, logging
 from secrets import API_Key, Client_Secret, Refresh_Token, account_name
-account_filename = os.environ["HOME"]+ "/.config/insteon-python/accounts/" + account_name + ".pickle"
+account_filename = os.environ["HOME"]+ "/.local/insteon-python/accounts/" + account_name + ".pickle"
 
 account_authorization = ""
 account_houses = {}
@@ -65,7 +65,9 @@ def account_list():
 	return return_dict
 
 #Houses Endpoint	
-def get_house(house_id):
+def get_house(house_id1):
+        global rooms, devices, scenes
+        house_id = str(house_id1)
 	basic_info = general_get_request("houses/" + house_id)
 	rooms = general_get_request("houses/" + house_id + "/rooms")
 	devices = general_get_request("houses/" + house_id + "/devices")
@@ -96,6 +98,9 @@ def populate_houses():
 		house_data[house_id] = get_house(house_id)
 		house_data[house_id]['Name'] = item['HouseName']
 	save_account()
+def populate_all():
+        if len(account_houses['HouseList']) == 1:
+            get_house(account_houses['HouseList'][0]['HouseID'])
 
 #Devices Endpoint
 def populate_devices():
@@ -194,8 +199,11 @@ def device_on(device_id, level=0):
 		for device in devices["DeviceList"]:
 			if device_id == device["DeviceID"]:
 				#print "Finding level"
-				prelevel = device["DimLevel"]
-				level  = (( prelevel + 1) * 100 )/ 255
+				if "DimLevel" in device:
+					prelevel = device["DimLevel"]
+					level  = (( prelevel + 1) * 100 )/ 255
+				else:
+					level = 100
 	if level < 10: #It doesn't work correctly under 10. Who knows why....
 		level = 10
 	device_command(device_id, "on", {"level": level })
@@ -301,14 +309,16 @@ try:
 		account_authorization, account_houses, house_data, devices, rooms, scenes = pickle.load(f)
 		#print account_authorization, account_houses;
 except:
-	save_account()
+        populate_houses()
+        populate_all
+        save_account()
 
 try: 
 	with open('device_categories.json') as data_file:
 		data = json.load(data_file)
 		dev_categories = data['Device Category List']
 except:
-	with open(os.environ["HOME"] + '/.config/insteon-python/device_categories.json') as data_file:
+	with open(os.environ["HOME"] + '/.local/insteon-python/device_categories.json') as data_file:
 		data = json.load(data_file)
 		dev_categories = data['Device Category List']
 
