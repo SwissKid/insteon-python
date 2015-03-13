@@ -101,6 +101,8 @@ def populate_houses():
 def populate_all():
         if len(account_houses['HouseList']) == 1:
             get_house(account_houses['HouseList'][0]['HouseID'])
+	populate_rooms()
+	populate_devices()
 
 #Devices Endpoint
 def populate_devices():
@@ -215,7 +217,7 @@ def dev_search_id(device_id):
 
 
 #Room Endpoint
-def get_rooms():
+def populate_rooms():
 	global rooms
 	rooms = general_get_request("rooms?properties=all")
 	save_account()
@@ -310,7 +312,7 @@ try:
 		#print account_authorization, account_houses;
 except:
         populate_houses()
-        populate_all
+        populate_all()
         save_account()
 
 try: 
@@ -337,3 +339,4 @@ except:
 #		device_on(device["DeviceID"], 5)
 #get_scenes()
 #scene_listing()
+# vim: set shiftwidth=4 : #
