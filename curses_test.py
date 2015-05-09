@@ -18,17 +18,31 @@ stdscr.keypad(True)
 check_time = 30
 hilight = 0
 mapping_list = []
-lines = insteon.rooms["RoomList"]
+remote_only_devcat = [0]
+lines = []
 
+def init_lines():
+	global lines
+	tobepopped = []
+	pre_lines = insteon.rooms["RoomList"]
+	for r_index,room in enumerate(pre_lines):
+		for d_index,device in enumerate(room["DeviceList"]):
+			device_info = insteon.dev_search_id(device["DeviceID"])
+			if device_info["DevCat"] in remote_only_devcat:
+				tobepopped.append((r_index,d_index))
+			pre_lines[r_index]["DeviceList"][d_index] = device_info
+	for poppers in tobepopped:
+		pre_lines[poppers[0]]["DeviceList"].pop(poppers[1])
+	lines = pre_lines
+			
 def init_draw_list(lines):
 	global mapping_list 
 	line = 0
 	for item in lines:
 		mapping_list.append( { "Type" : "Room", "DeviceList" : item["DeviceList"] })
 		line += 1
-		for device_item in item["DeviceList"]:
-			device = insteon.dev_search_id(device_item["DeviceID"])
-			mapping_list.append( { "Type" : "Device", "DeviceID" : device_item["DeviceID"], "Status" : "Unknown" })
+		for device in item["DeviceList"]:
+			mapping_list.append( { "Type" : "Device", "DeviceID" : device["DeviceID"], "Status" : "Unknown" })
 			line += 1
 	return line - 1, mapping_list
 
@@ -47,9 +61,7 @@ def draw_list(lines):
 		line += 1
 		for device_item in item["DeviceList"]:
 			x = 8
-			device_thing = insteon.dev_search_id(device_item["DeviceID"])
-			device = device_thing["DeviceName"]
-			#mapping_list.append( { "Type" : "Device", "DeviceID" : device_item["DeviceID"] })
+			device = device_item["DeviceName"]
 			if line >= len(mapping_list):
 				logging.error( "What is wrong?")
 				logging.error(mapping_list)
@@ -138,6 +150,7 @@ def check_threads(threads):
 		threads.popleft()	
 def main(stdscr):
 	global hilight, mapping_list
+	init_lines()
 	stdscr.clear()
 	insteon.populate_rooms()
 	threads = deque([])
