@@ -139,7 +139,7 @@ def check_threads(threads):
 def main(stdscr):
 	global hilight, mapping_list
 	stdscr.clear()
-	insteon.get_rooms()
+	insteon.populate_rooms()
 	threads = deque([])
 	stdscr.addstr(2,2, "Loading")
 	stdscr.refresh()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import os, urllib, urllib2, json, pickle, logging
 from secrets import API_Key, Client_Secret, Refresh_Token, account_name
-account_filename = os.environ["HOME"]+ "/.local/insteon-python/accounts/" + account_name + ".pickle"
+account_filename = os.environ["HOME"]+ "/.local/share/insteon-python/accounts/" + account_name + ".pickle"
 
 account_authorization = ""
 account_houses = {}
@@ -108,6 +108,12 @@ def populate_all():
 def populate_devices():
 	global devices
 	devices = general_get_request("devices?properties=all")
+	for index,device in enumerate(devices["DeviceList"]):
+		for category in dev_categories:
+			if device["DevCat"] == int(category["Device Category"],16) and device["SubCat"] == int(category["Device Sub-Category"],16):
+				devices["DeviceList"][index]["DeviceTypeName"]=category["Name"]
+				devices["DeviceList"][index]["SKU"]=category["SKU"]
+				break
 	save_account()
 
 
@@ -155,7 +161,7 @@ def device_command(device_id, command_string, data_list={}):
 
 
 	#print command_return
-	return command_return["status"]
+	return command_return["response"]
 
 def dev_status(device_id):
 	dict_return = device_command(device_id, "get_status")
