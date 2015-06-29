@@ -2,7 +2,7 @@
 import curses, logging, threading, time
 import insteon_api as insteon
 from collections import deque
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 stdscr = curses.initscr()
 
