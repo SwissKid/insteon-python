@@ -147,11 +147,13 @@ def device_command(device_id, command_string, data_list={}):
 			if e.code == 403 or e.code == 401:
 				print e.read()
 				refresh_bearer()
-			continue
+				continue
+			break
 		break
-	content = response.read()
-	dict_return = json.loads(content)
-	command_id = dict_return["id"]
+	if response:
+		content = response.read()
+		dict_return = json.loads(content)
+		command_id = dict_return["id"]
 	while True:
 		command_return = general_get_request("commands/" + str(command_id))
 		status = command_return["status"]
@@ -248,7 +250,7 @@ def room_listing():
 #				device_on(device["DeviceID"])
 	
 #Scenes Endpoint
-def get_scenes():
+def populate_scenes():
 	global scenes
 	scenes = general_get_request("scenes?properties=all")
 	save_account()
