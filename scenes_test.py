@@ -120,7 +120,6 @@ def threaded_off(device_id):
 	thread.daemon = True
 	thread.start()
 	mapping_list[hilight]["Status"] = "0"
-	#logging.error(mapping_list)
 	draw_list(lines)	
 	stdscr.refresh()
 	thread2 = threading.Thread(target=delay_status, args=(device_id,))
